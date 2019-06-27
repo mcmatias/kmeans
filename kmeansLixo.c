@@ -41,7 +41,7 @@ int main(void) {
 			//aqui eh a duvida
 			//se um processo pode interferir no outro
 			//como devo fazer?
-			#pragma omp parallel private(color, dmin, dc, flips1)
+			#pragma omp parallel private(color, dmin, dx, flips1)
 			{	
 				double dmin, dx;
 				int color;
