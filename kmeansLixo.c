@@ -41,7 +41,7 @@ int main(void) {
 			//aqui eh a duvida
 			//se um processo pode interferir no outro
 			//como devo fazer?
-			#pragma omp parallel private(color, dmin, dx, flips1)
+			#pragma omp parallel
 			{	
 				double dmin, dx;
 				int color;
@@ -49,23 +49,26 @@ int main(void) {
 				//double dmin1 = dmin;
 				//int clusteri = cluster[i];
 				int flips1 = flips;
+				int index;
+				int jindex;
+				int cindex;
 				#pragma omp for
 				{
-					for (i = 0; i < n; i++) {
-					dmin = -1; color = cluster[i];
-							for (c = 0; c < k; c++) {
+					for (index = 0; index < n; index++) {
+					dmin = -1; color = cluster[index];
+							for (cindex = 0; cindex < k; cindex++) {
 								dx = 0.0;
-								for (j = 0; j < DIM; j++) 
-									dx +=  (x[i*DIM+j] - mean[c*DIM+j])*(x[i*DIM+j] - mean[c*DIM+j]);
+								for (jindex = 0; jindex < DIM; jindex++) 
+									dx +=  (x[index*DIM+jindex] - mean[cindex*DIM+jindex])*(x[index*DIM+jindex] - mean[cindex*DIM+jindex]);
 								if (dx < dmin || dmin == -1) {
-									color = c;
+									color = cindex;
 									dmin = dx;
 								}
 							}
 					
-					if (cluster[i] != color) {
+					if (cluster[index] != color) {
 						flips1++;
-						cluster[i] = color;
+						cluster[index] = color;
 			      	}
 				}//loop mais externo
 			}//omp for
