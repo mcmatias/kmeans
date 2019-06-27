@@ -40,26 +40,26 @@ int main(void) {
 		count = (int *)malloc(sizeof(int)*k);
 		for (i = 0; i<n; i++) {
 			cluster[i] = 0;
-	}	 
+		}	 
 		
 		
 		for( i=1; i<p; i++ ) {
-			MPI_Send( &mean[i*k/p], k/p, MPI_DOUBLE,
-					i,tag,MPI_COMM_WORLD );
-			MPI_Send( &sum[i*k/p], k/p, MPI_DOUBLE,
-					i, tag, MPI_COMM_WORLD );
-			MPI_Send( &x[i*n/p], n/p, MPI_DOUBLE,
-					i, tag, MPI_COMM_WORLD );
-			MPI_Send( &k, k, MPI_INT,
+			MPI_Send( &k, 1, MPI_INT,
 					i, tag, MPI_COMM_WORLD );
 			printf("enviou k=%d\n", k);
-			MPI_Send( &n, n/p, MPI_INT,
+			MPI_Send( &n, 1, MPI_INT,
+					i, tag, MPI_COMM_WORLD );
+			MPI_Send( &mean, DIM*k, MPI_DOUBLE,
+					i,tag,MPI_COMM_WORLD );
+			MPI_Send( &sum, DIM*k, MPI_DOUBLE,
+					i, tag, MPI_COMM_WORLD );
+			MPI_Send( &x[i*DIM*n/p], DIM*n/p, MPI_DOUBLE,
 					i, tag, MPI_COMM_WORLD );
 		}
 		    
 		
 		//processamento do myrank0
-		flips = n;
+		flips = n/p;
 		while (flips>0) {
 			flips = 0;
 			for (j = 0; j < k; j++) {
@@ -89,38 +89,53 @@ int main(void) {
 				for (j = 0; j < DIM; j++) 
 					sum[cluster[i]*DIM+j] += x[i*DIM+j];
 			}
+			printf("flips = %d\n", flips);
 			for (i = 0; i < (k/p); i++) {
 				for (j = 0; j < DIM; j++) {
 					mean[i*DIM+j] = sum[i*DIM+j]/count[i];
-					printf("mean[i*DIM+j] %lf\n", mean[i*DIM+j]);
+					printf("mean[i*DIM+j] %lf, i= %d j = %d, myid=%d\n", mean[i*DIM+j], i, j, myrank);
 	  			}
 			}
 		}
 		printf("terminou myrank0 k=%d\n", k);
 		//processamento do myrank0
 	} else {
+
 		printf("inicio processamento myranki\n");
-		MPI_Recv(&k, k, MPI_INT,
+		MPI_Recv(&k, 1, MPI_INT,
 			0, tag, MPI_COMM_WORLD, &status );
 		printf("recebeu k, k=%d\n", k);
-		MPI_Recv(&n, n/p, MPI_INT,
+		MPI_Recv(&n, 1, MPI_INT,
 			0, tag, MPI_COMM_WORLD, &status );
 		printf("recebeu n, n=%d\n", n);
-		MPI_Recv(mean, k/p, MPI_DOUBLE,
+		
+		mean = (double *)malloc(sizeof(double)*DIM*k);
+		sum= (double *)malloc(sizeof(double)*DIM*k);
+		x = (double *)malloc(sizeof(double)*DIM*n);
+		
+		MPI_Recv(mean, DIM*k, MPI_DOUBLE,
 			0, tag, MPI_COMM_WORLD, &status );
-		MPI_Recv(sum, k/p, MPI_DOUBLE,
+		printf("recebeu mean\n");
+		MPI_Recv(sum, DIM*k, MPI_DOUBLE,
 			0, tag, MPI_COMM_WORLD, &status );
-		MPI_Recv(x, n/p, MPI_DOUBLE,
+		printf("recebeu sum\n");
+		MPI_Recv(x, DIM*n/p, MPI_DOUBLE,
 			0, tag, MPI_COMM_WORLD, &status );
 		
 		printf("apos recv myranki k=%d, n=%d \n", k, n);
+		
+		cluster = (int *)malloc(sizeof(int)*n);
+		count = (int *)malloc(sizeof(int)*k);
+		for (i = 0; i<n; i++) {
+			cluster[i] = 0;
+		}	 
 		
 		for (i=0; i<n/p;i++){
 			printf("cluster %d\n", cluster[i]);	
 			}
 		printf("final do for\n");
 		//processamento do myranki
-		flips = n;//?sera que aqui continua n?
+		flips = n/p;//?sera que aqui continua n?
 		while (flips>0) {
 			flips = 0;
 			for (j = 0; j < k; j++) {
@@ -178,10 +193,10 @@ int main(void) {
 
 	//parte sequencial
 	
-	for (i = 0; i < k; i++) {
-		dist = sqrt( pow (mean[i*DIM] - 0.0, 2) + pow (mean[i*DIM+1] - 0.0, 2) + pow (mean[i*DIM+2] - 0.0, 2) );
-	}
-	pontoMedio = [(x1+x2)/2, (y1+y2)/2, (z1+z2)/2]; 
+	//for (i = 0; i < k; i++) {
+		//dist = sqrt( pow (mean[i*DIM] - 0.0, 2) + pow (mean[i*DIM+1] - 0.0, 2) + pow (mean[i*DIM+2] - 0.0, 2) );
+	//}
+	//pontoMedio = [(x1+x2)/2, (y1+y2)/2, (z1+z2)/2]; 
 
 	//resultado final fica no mean
 	for (i = 0; i < k; i++) {
