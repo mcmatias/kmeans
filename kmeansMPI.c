@@ -179,13 +179,13 @@ int main(void) {
 	/* Coleta do Resultado */
 	if (myrank != 0) {
 		printf("coleta myrank i\n");
-		MPI_Send(meanTemp, 1,MPI_DOUBLE,
+		MPI_Send(meanTemp, DIM*k,MPI_DOUBLE,
 				0,tag, MPI_COMM_WORLD);
 		printf("enviou meanTemp\n");
 	} else {
 		for (i=1; i<p; i++){
 			printf("entrou no for i=%d \n", i);
-			MPI_Recv(meanTemp, 1, MPI_DOUBLE,
+			MPI_Recv(meanTemp, DIM*k, MPI_DOUBLE,
 					i, tag, MPI_COMM_WORLD, &status);
 			printf("recebeu meanTemp no for i=%d \n", i);
 		}
