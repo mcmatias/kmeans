@@ -185,6 +185,7 @@ int main(void) {
 	} else {
 		for (i=1; i<p; i++){
 			printf("entrou no for i=%d \n", i);
+			meanTemp = (double *)malloc(sizeof(double)*DIM*k);
 			MPI_Recv(meanTemp, DIM*k, MPI_DOUBLE,
 					i, tag, MPI_COMM_WORLD, &status);
 			printf("recebeu meanTemp no for i=%d \n", i);
